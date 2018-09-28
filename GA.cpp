@@ -10,9 +10,9 @@
 #include <string.h>
 #include <sstream>
 #define data_size 51
-#define num_autosome 50
-#define crossover_rate 0.7
-#define mutation_rate 0.1
+#define num_autosome 1
+#define crossover_rate 0
+#define mutation_rate 1
 #define dim 2
 
 using namespace std;
@@ -135,7 +135,7 @@ void crossover(vector<vector<int>> &path)
             }
             ////////////////////切割交換////////////////////
             vector<vector<int>> origin_path;
-            
+
             for (j = 0; j <= data_size; j++)
                 if (changed_record[j] == 0)
                 {
@@ -207,6 +207,12 @@ void mutation(vector<vector<int>> &path) ///////////////突變////////////////
 {
     int i, j, r_1, r_2, tmp;
     double possibility_to_mutation;
+    vector<int> HC_path(51);
+
+    for (i = 0; i < data_size; i++)
+        HC_path[i] = path[0][i];
+
+    float HC_distance = 0, GA_distance = 0;
 
     for (i = 0; i < num_autosome; i++)
     {
@@ -218,9 +224,25 @@ void mutation(vector<vector<int>> &path) ///////////////突變////////////////
             while (r_1 == r_2)
                 r_2 = rand() % data_size;
 
-            tmp = path[i][r_1];
-            path[i][r_1] = path[i][r_2];
-            path[i][r_2] = tmp;
+            tmp = HC_path[r_1];
+            HC_path[r_1] = HC_path[r_2];
+            HC_path[r_2] = tmp;
+
+            for(j=0;j<data_size-1;j++)
+            {
+                HC_distance+=sqrt(pow(eil[HC_path[j]][0]-(eil[HC_path[j+1]][0]),2)+pow(eil[HC_path[j]][1]-eil[HC_path[j+1]][1],2));
+            }
+
+            for(j=0;j<data_size-1;j++)
+            {
+                GA_distance+=sqrt(pow(eil[path[0][j]][0]-(eil[path[0][j+1]][0]),2)+pow(eil[path[0][j]][1]-eil[path[0][j+1]][1],2));
+            }
+            if (HC_distance < GA_distance)
+            {
+                tmp = path[0][r_1];
+                path[0][r_1] = path[0][r_2];
+                path[0][r_2] = tmp;
+            }
         }
     }
 }
@@ -275,17 +297,18 @@ int main()
     vector<float> selection_rate(num_autosome);
     float Denominator;
     best_distance = 10000;
-    while (itteration <= 5000)
+    while (itteration <= 1000)
     {
         best_path.resize(data_size);
         Denominator = 0;
         fitness(num_path, Denominator, selection_rate);
-        selectionD(num_path, num_path, selection_rate);
+        cout << best_distance << endl;
+        //selectionD(num_path, num_path, selection_rate);
         crossover(num_path);
         mutation(num_path);
         itteration++;
     }
-    cout << best_distance << endl;
+
     system("pause");
     return 0;
 }
