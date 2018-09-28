@@ -10,7 +10,7 @@
 #include <string.h>
 #include <sstream>
 #define data_size 51
-#define num_autosome 10
+#define num_autosome 50
 #define crossover_rate 0.7
 #define mutation_rate 0.1
 #define dim 2
@@ -66,9 +66,6 @@ void init(vector<vector<int>> &path) //////////////初始化//////////////////
             path[i][r] = tmp;
         }
     }
-    // for(i=0;i<data_size;i++)
-    //     cout<<path[9][i]<<endl;
-    //     cout<<endl<<endl;
 }
 
 void selectionD(vector<vector<int>> &new_path, vector<vector<int>> path, vector<float> selection_rate)
@@ -106,14 +103,11 @@ void crossover(vector<vector<int>> &path)
     int segmentation_point_1, segmentation_point_2;
     double possibility_to_cross;
     vector<vector<int>> changed_path;
-    vector<int> remain_path_index(10), it;
+    vector<int> remain_path_index(num_autosome), it;
     changed_path.resize(10);
 
     for (i = 0; i < num_autosome; i++)
-    {
         remain_path_index[i] = i;
-        //cout<<remain_path_index[i]<<endl;
-    }
 
     for (i = 0; i < (num_autosome / 2); i++)
     {
@@ -126,12 +120,6 @@ void crossover(vector<vector<int>> &path)
         segmentation_point_2 = rand() % (data_size - segmentation_point_1 - 1) + segmentation_point_1 + 1;
 
         possibility_to_cross = (float)rand() / RAND_MAX;
-
-        // cout << "r_1 = " << r_1 << " r_2 =  " << r_2 << "  cross rate: " << possibility_to_cross << endl;
-        // cout << segmentation_point_1 << " " << segmentation_point_2 << endl;
-        // // for (k = 0; k < remain_path_index.size(); k++)
-        // //     cout << remain_path_index[k] << endl;
-        // // cout << endl;
 
         int flag = 1, changed_record[data_size] = {0};
         //////////////////doing crossover///////////////////////////////
@@ -146,6 +134,8 @@ void crossover(vector<vector<int>> &path)
                 changed_record[j] = 1;
             }
             ////////////////////切割交換////////////////////
+            vector<vector<int>> origin_path;
+            
             for (j = 0; j <= data_size; j++)
                 if (changed_record[j] == 0)
                 {
@@ -237,12 +227,12 @@ void mutation(vector<vector<int>> &path) ///////////////突變////////////////
 
 void fitness(vector<vector<int>> &path, float Denominator, vector<float> &selection_rate)
 {
-    int i, j, k, best_path_index=0;
+    int i, j, k, best_path_index = 0;
     float current_distance = 0;
     vector<float> path_distance;
     path_distance.assign(10, 0);
     path_distance.resize(num_autosome);
-    //best_distance = 100000;
+
     for (i = 0; i < num_autosome; i++)
     {
         current_distance = 0.0;
@@ -257,13 +247,10 @@ void fitness(vector<vector<int>> &path, float Denominator, vector<float> &select
         }
         if (path_distance[i] < best_distance)
         {
-            //cout<<path_distance[i]<<" "<<best_distance<<" ";
             best_distance = path_distance[i];
             best_path_index = i;
-            //cout<<best_distance<<endl;
         }
         Denominator += path_distance[i];
-        //cout<<path_distance[i]<<endl;
     }
     for (i = 0; i < num_autosome; i++)
         selection_rate[i] = 1 / (path_distance[i] / Denominator);
@@ -284,45 +271,18 @@ int main()
 
     init(num_path);
 
-    // for (i = 0; i < num_autosome; i++)
-    // {
-    //     cout << "path " << i << endl;
-    //     for (j = 0; j < data_size; j++)
-    //         cout << num_path[i][j] << "->";
-    //     cout << endl
-    //          << endl;
-    // }
-
-    //cout << "////////////////" << endl;
-
     int itteration = 0;
     vector<float> selection_rate(num_autosome);
     float Denominator;
-    best_distance=10000;
-    while (itteration <= 50000)
+    best_distance = 10000;
+    while (itteration <= 5000)
     {
         best_path.resize(data_size);
         Denominator = 0;
         fitness(num_path, Denominator, selection_rate);
         selectionD(num_path, num_path, selection_rate);
         crossover(num_path);
-
-        // for (i = 0; i < num_autosome; i++)
-        // {
-        //     cout << "path " << i << endl;
-        //     for (j = 0; j < data_size; j++)
-        //         cout << num_path[i][j] << "->";
-        //     cout << endl
-        //          << endl;
-        // }
         mutation(num_path);
-        // for(i=0;i<data_size;i++)
-        //     cout<<eil[num_path[0][i]][0]<<endl;
-        
-        // for(i=0;i<num_autosome;i++)
-        //     cout<<selection_rate[i]<<endl;
-
-        
         itteration++;
     }
     cout << best_distance << endl;
